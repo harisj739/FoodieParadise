@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Foodie\'s Paradise</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="user">User</string>
+    <string name="returnToHomePage">Would you like to return to the home page?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="welcome">Welcome</string>
+    <string name="logout">Logout?</string>
+    <string name="please_login">Please Login</string>
+    <string name="noUsernameMessage">No username found!</string>
+    <string name="restaurantSelection">Please Select a Restaurant</string>
 </resources>
