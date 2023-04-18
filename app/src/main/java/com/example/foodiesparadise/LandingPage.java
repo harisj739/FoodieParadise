@@ -67,7 +67,9 @@ public class LandingPage extends AppCompatActivity {
         getDatabase();
         checkForUser();
         loginUser(mUserId);
-        mWelcome.setText("Welcome " + mUser.getUsername() +"!");
+        if (checkForUserInPref()) {
+            mWelcome.setText("Welcome " + mUser.getUsername() + "!");
+        }
         checkIfAdmin();
     }
 
@@ -196,6 +198,15 @@ public class LandingPage extends AppCompatActivity {
                 .getUserDAO();
     }
 
+    private boolean checkForUserInPref() {
+        mUserId = mPreferences.getInt(USER_ID_KEY, -1);
+        if (mUserId != -1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     private void checkForUser() {
         mUserId = getIntent().getIntExtra(USER_ID_KEY, -1);
 
@@ -213,14 +224,7 @@ public class LandingPage extends AppCompatActivity {
             return;
         }
 
-        List<User> users = mUserDAO.getAllUsers();
-        if(users.size() <= 0) {
-            User defaultUser = new User ("testuser1", "testuser1", false);
-            User defaultUserTwo = new User ("admin2", "admin2", true);
-            mUserDAO.insert(defaultUser, defaultUserTwo);
-        }
-
-        Intent intent = MainActivity.intentFactory(this);
+        Intent intent = MainActivity.intentFactory(getApplicationContext());
         startActivity(intent);
     }
 
