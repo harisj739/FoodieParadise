@@ -7,6 +7,7 @@ import androidx.room.Room;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +19,9 @@ import com.example.foodiesparadise.db.UserDAO;
 
 public class SignUpActivity extends AppCompatActivity {
 
+    private static final String USER_ID_KEY = "com.example.foodiesparadise.userIdKey";
+
+    private static final String PREFERENCES_KEY = "com.example.foodiesparadise.PREFERENCES_KEY";
     private EditText mCreateUsername;
     private EditText mCreatePassword;
     private EditText mConfirmPassword;
@@ -28,6 +32,8 @@ public class SignUpActivity extends AppCompatActivity {
     private String mPassword;
     private String mVerifyPassword;
     private User mUser;
+    private SharedPreferences mPreferences;
+    private User mNewUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +106,10 @@ public class SignUpActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 User newUser = new User(mUsername, mPassword, true);
                 mUserDAO.insert(newUser);
-                Intent intent = LoginActivity.intentFactory(getApplicationContext());
+                mUser = mUserDAO.getUserByUsername(mUsername);
+//                loginUser(mUser.getUserId());
+                addUserToPreference(mUser.getUserId());
+                Intent intent = RegisterRestaurant.intentFactory(getApplicationContext(), mUser.getUserId());
                 startActivity(intent);
             }
         });
@@ -109,12 +118,40 @@ public class SignUpActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 User newUser = new User(mUsername, mPassword, false);
                 mUserDAO.insert(newUser);
+                mUser = mUserDAO.getUserByUsername(mUsername);
+                addUserToPreference(mUser.getUserId());
                 Intent intent = LoginActivity.intentFactory(getApplicationContext());
                 startActivity(intent);
             }
         });
         //
         alertBuilder.create().show();
+    }
+
+    private void loginUser(int userId) {
+        //We try to pull our user out of the
+        //database using the user ID.
+        mUser = mUserDAO.getUserByUserId(userId);
+        //Adds our user to the shared preference.
+        addUserToPreference(userId);
+        //Built-in method that is designed to reset
+        //the menu with the username. Fires up the
+        //overridden onPrepareOptionsMenu() method.
+//        invalidateOptionsMenu();
+    }
+
+    private void addUserToPreference(int userId) {
+        if (mPreferences == null) {
+            getPrefs();
+        }
+        //
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putInt(USER_ID_KEY, userId);
+        editor.apply();
+    }
+
+    private void getPrefs() {
+        mPreferences = this.getSharedPreferences(PREFERENCES_KEY, Context.MODE_PRIVATE);
     }
     public static Intent intentFactory(Context context) {
         Intent intent = new Intent(context, SignUpActivity.class);
