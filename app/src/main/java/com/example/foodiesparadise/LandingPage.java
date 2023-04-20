@@ -19,11 +19,11 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.foodiesparadise.db.AppDatabase;
+import com.example.foodiesparadise.db.RestaurantDAO;
 import com.example.foodiesparadise.db.UserDAO;
-
-import java.util.List;
 
 public class LandingPage extends AppCompatActivity {
 
@@ -31,6 +31,8 @@ public class LandingPage extends AppCompatActivity {
     private static final String PREFERENCES_KEY = "com.example.foodiesparadise.PREFERENCES_KEY";
     private TextView mWelcome;
     private UserDAO mUserDAO;
+
+    private RestaurantDAO mRestaurantDAO;
     private int mUserId = -1;
 
     private SharedPreferences mPreferences = null;
@@ -38,7 +40,7 @@ public class LandingPage extends AppCompatActivity {
 
     private MenuItem mItem;
 
-    private String[] mRestaurants = {"Restaurant 1", "Restaurant 2", "Restaurant 3"};
+    private String[] mRestaurantName = {"Restaurant 1", "Restaurant 2", "Restaurant 3"};
 
     private AutoCompleteTextView mAutoCompleteTextView;
 
@@ -54,6 +56,8 @@ public class LandingPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing_page);
 
+        getDatabase();
+
         wireUpDisplay();
 
         mAutoCompleteTextView.setAdapter(mAdapterItem);
@@ -64,17 +68,19 @@ public class LandingPage extends AppCompatActivity {
             }
         });
 
-        getDatabase();
         checkForUser();
         loginUser(mUserId);
-        mWelcome.setText("Welcome " + mUser.getUsername() +"!");
+        if (checkForUserInPref()) {
+            mWelcome.setText("Welcome " + mUser.getUsername() + "!");
+        }
         checkIfAdmin();
     }
 
     private void wireUpDisplay() {
         mWelcome = findViewById(R.id.welcomeUser);
         mAutoCompleteTextView = findViewById(R.id.autoCompleteTextView);
-        mAdapterItem = new ArrayAdapter<>(this, R.layout.list_items, mRestaurants);
+
+        mAdapterItem = new ArrayAdapter<String>(this, R.layout.list_items, mRestaurantName);
 
         mViewOrdersButton = findViewById(R.id.viewOrders);
         mOrderHistoryButton = findViewById(R.id.orderHistory);
@@ -190,12 +196,25 @@ public class LandingPage extends AppCompatActivity {
 
 
     private void getDatabase() {
+        mRestaurantDAO = Room.databaseBuilder(this, AppDatabase.class, AppDatabase.DB_NAME)
+                .allowMainThreadQueries()
+                .build()
+                .getRestaurantDAO();
         mUserDAO = Room.databaseBuilder(this, AppDatabase.class, AppDatabase.DB_NAME)
                 .allowMainThreadQueries()
                 .build()
                 .getUserDAO();
     }
 
+    private boolean checkForUserInPref() {
+        mUserId = mPreferences.getInt(USER_ID_KEY, -1);
+        if (mUserId != -1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     private void checkForUser() {
         mUserId = getIntent().getIntExtra(USER_ID_KEY, -1);
 
@@ -213,14 +232,7 @@ public class LandingPage extends AppCompatActivity {
             return;
         }
 
-        List<User> users = mUserDAO.getAllUsers();
-        if(users.size() <= 0) {
-            User defaultUser = new User ("testuser1", "testuser1", false);
-            User defaultUserTwo = new User ("admin2", "admin2", true);
-            mUserDAO.insert(defaultUser, defaultUserTwo);
-        }
-
-        Intent intent = MainActivity.intentFactory(this);
+        Intent intent = MainActivity.intentFactory(getApplicationContext());
         startActivity(intent);
     }
 
