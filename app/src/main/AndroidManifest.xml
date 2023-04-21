@@ -12,6 +12,9 @@
         android:theme="@style/Theme.FoodiesParadise"
         tools:targetApi="31">
         <activity
+            android:name=".RestaurantPage"
+            android:exported="false" />
+        <activity
             android:name=".RegisterRestaurant"
             android:exported="false" />
         <activity

@@ -95,7 +95,6 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void userOrAdmin() {
-        boolean admin = true;
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
 
         alertBuilder.setMessage("Would you like to create an admin account?");

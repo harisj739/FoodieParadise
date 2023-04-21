@@ -1,9 +1,11 @@
 package com.example.foodiesparadise;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -70,14 +72,37 @@ public class RegisterRestaurant extends AppCompatActivity {
                     mRestaurantDAO.insert(newRestaurant);
                     mRestaurant = mRestaurantDAO.getRestaurantByName(restaurantName);
                     addRestaurantToPreference(mRestaurant.getRestaurantId());
-                    Intent intent = LoginActivity.intentFactory(getApplicationContext());
-                    startActivity(intent);
+                    setUpRestaurantPage();
                 }
                 else {
                     Toast.makeText(RegisterRestaurant.this, "The restaurant name " + restaurantName + " is already taken.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    private void setUpRestaurantPage() {
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+
+        alertBuilder.setMessage("Would you like to set up " + restaurantName + "'s home page?");
+
+        //The positive button is the button that reads yes
+        alertBuilder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = RestaurantPage.intentFactory(getApplicationContext(), mUserId);
+                startActivity(intent);
+            }
+        });
+        alertBuilder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = LoginActivity.intentFactory(getApplicationContext());
+                startActivity(intent);
+            }
+        });
+        //
+        alertBuilder.create().show();
     }
 
     private void addRestaurantToPreference(int restaurantId) {
