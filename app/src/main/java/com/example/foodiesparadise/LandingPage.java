@@ -9,21 +9,26 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CursorAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.foodiesparadise.db.AppDatabase;
+import com.example.foodiesparadise.db.RestaurantDAO;
 import com.example.foodiesparadise.db.UserDAO;
-
-import java.util.List;
 
 public class LandingPage extends AppCompatActivity {
 
@@ -31,6 +36,8 @@ public class LandingPage extends AppCompatActivity {
     private static final String PREFERENCES_KEY = "com.example.foodiesparadise.PREFERENCES_KEY";
     private TextView mWelcome;
     private UserDAO mUserDAO;
+
+    private RestaurantDAO mRestaurantDAO;
     private int mUserId = -1;
 
     private SharedPreferences mPreferences = null;
@@ -38,7 +45,7 @@ public class LandingPage extends AppCompatActivity {
 
     private MenuItem mItem;
 
-    private String[] mRestaurants = {"Restaurant 1", "Restaurant 2", "Restaurant 3"};
+    private String[] mRestaurantName = {"Restaurant 1", "Restaurant 2", "Restaurant 3"};
 
     private AutoCompleteTextView mAutoCompleteTextView;
 
@@ -54,6 +61,8 @@ public class LandingPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing_page);
 
+        getDatabase();
+
         wireUpDisplay();
 
         mAutoCompleteTextView.setAdapter(mAdapterItem);
@@ -64,23 +73,74 @@ public class LandingPage extends AppCompatActivity {
             }
         });
 
-        getDatabase();
         checkForUser();
         loginUser(mUserId);
-        mWelcome.setText("Welcome " + mUser.getUsername() +"!");
+        if (checkForUserInPref()) {
+            mWelcome.setText("Welcome " + mUser.getUsername() + "!");
+        }
+
         checkIfAdmin();
+//        mEditInfoButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                editRestaurantInfo();
+//            }
+//        });
     }
 
     private void wireUpDisplay() {
         mWelcome = findViewById(R.id.welcomeUser);
         mAutoCompleteTextView = findViewById(R.id.autoCompleteTextView);
-        mAdapterItem = new ArrayAdapter<>(this, R.layout.list_items, mRestaurants);
+
+        mAdapterItem = new ArrayAdapter<String>(this, R.layout.list_items, mRestaurantName);
 
         mViewOrdersButton = findViewById(R.id.viewOrders);
         mOrderHistoryButton = findViewById(R.id.orderHistory);
         mTrackDataButton = findViewById(R.id.trackRestaurantData);
         mEditInfoButton = findViewById(R.id.editRestaurantInfo);
     }
+
+//    private void editRestaurantInfo() {
+//        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+//
+//        mItemName = new EditText(RestaurantPage.this);
+//        mItemName.setHint("Enter Item Name");
+//        mItemType = new EditText(RestaurantPage.this);
+//        mItemType.setHint("Enter Item Type (Entree, Dessert, etc)");
+//        mItemCost = new EditText(RestaurantPage.this);
+//        mItemCost.setHint("Enter Item Cost");
+//
+//        alertBuilder.setMessage("Add Item Information");
+//
+//        alertBuilder.setView(mItemName);
+//        alertBuilder.setView(mItemType);
+//        alertBuilder.setView(mItemCost);
+//
+//        LinearLayout layout = new LinearLayout(this);
+//        layout.setOrientation(LinearLayout.VERTICAL);
+//        layout.addView(mItemName);
+//        layout.addView(mItemType);
+//        layout.addView(mItemCost);
+//        alertBuilder.setView(layout);
+//
+//        alertBuilder.setPositiveButton(getString(R.string.add_item), new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//                getValuesFromEditText();
+//                Item newItem = new Item(mRestaurant.getRestaurantId(), mUserId, itemName, itemType, itemCost);
+//                mItemDAO.insert(newItem);
+//                Toast.makeText(RestaurantPage.this, "The item " + itemName + " has been added to the menu.", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//        alertBuilder.setNegativeButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//                Toast.makeText(RestaurantPage.this, "I will implement the dismiss feature.", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        alertBuilder.create().show();
+//    }
 
     private void checkIfAdmin() {
         if(mUser.isAdmin()) {
@@ -190,12 +250,25 @@ public class LandingPage extends AppCompatActivity {
 
 
     private void getDatabase() {
+        mRestaurantDAO = Room.databaseBuilder(this, AppDatabase.class, AppDatabase.DB_NAME)
+                .allowMainThreadQueries()
+                .build()
+                .getRestaurantDAO();
         mUserDAO = Room.databaseBuilder(this, AppDatabase.class, AppDatabase.DB_NAME)
                 .allowMainThreadQueries()
                 .build()
                 .getUserDAO();
     }
 
+    private boolean checkForUserInPref() {
+        mUserId = mPreferences.getInt(USER_ID_KEY, -1);
+        if (mUserId != -1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     private void checkForUser() {
         mUserId = getIntent().getIntExtra(USER_ID_KEY, -1);
 
@@ -213,14 +286,7 @@ public class LandingPage extends AppCompatActivity {
             return;
         }
 
-        List<User> users = mUserDAO.getAllUsers();
-        if(users.size() <= 0) {
-            User defaultUser = new User ("testuser1", "testuser1", false);
-            User defaultUserTwo = new User ("admin2", "admin2", true);
-            mUserDAO.insert(defaultUser, defaultUserTwo);
-        }
-
-        Intent intent = MainActivity.intentFactory(this);
+        Intent intent = MainActivity.intentFactory(getApplicationContext());
         startActivity(intent);
     }
 

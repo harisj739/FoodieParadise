@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.foodiesparadise.db.AppDatabase;
 import com.example.foodiesparadise.db.UserDAO;
@@ -37,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
         getDatabase();
         checkForUser();
-//                loginUser(mUserId);
-        addUserToPreference(mUserId);
+////                loginUser(mUserId);
+//        addUserToPreference(mUserId);
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -51,28 +52,13 @@ public class MainActivity extends AppCompatActivity {
         mCreateAccButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = SignUpActivity.intentFactory(getApplicationContext());
+                startActivity(intent);
             }
         });
     }
 
     private void checkForUser() {
-        mUserId = getIntent().getIntExtra(USER_ID_KEY, -1);
-
-        if (mUserId != -1) {
-            return;
-        } //if
-
-        if (mPreferences == null) {
-            getPrefs();
-        }
-
-        mUserId = mPreferences.getInt(USER_ID_KEY, -1);
-
-        if (mUserId != -1) {
-            return;
-        }
-
         List<User> users = mUserDAO.getAllUsers();
         if(users.size() <= 0) {
             User defaultUser = new User ("testuser1", "testuser1", false);

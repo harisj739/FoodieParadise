@@ -11,5 +11,20 @@
     <string name="logout">Logout?</string>
     <string name="please_login">Please Login</string>
     <string name="noUsernameMessage">No username found!</string>
-    <string name="restaurantSelection">Please Select a Restaurant</string>
+    <string name="restaurantSelection">Search Restaurant</string>
+    <string name="re_enter_password">Re-enter Password</string>
+    <string name="create_account">Create Account</string>
+    <string name="please_sign_up">Please Sign Up</string>
+    <string name="please_register_your_restaurant">Please Register Your Restaurant</string>
+    <string name="restaurant_name">Restaurant Name</string>
+    <string name="register">Register</string>
+    <string name="restaurant_location">Restaurant Location</string>
+    <string name="add_menu">Add Menu</string>
+    <string name="item_name">Item Name</string>
+    <string name="item_type">Item Type</string>
+    <string name="item_cost">Item Cost</string>
+    <string name="item_quantity">Item Quantity</string>
+    <string name="add_item">Add Item</string>
+    <string name="cancel">Cancel</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
